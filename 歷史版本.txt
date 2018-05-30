@@ -1,0 +1,175 @@
+//2018-5-29
+//bug:第一键无效
+#include<stdio.h>
+#include<conio.h>
+#include<stdlib.h>
+#include<windows.h>
+
+
+#define High	20					//屏幕高度
+#define Width	40					//屏幕宽度
+
+
+int display[High][Width] = {0};		//显示器元素
+int snackhead_x;		//蛇頭豎直坐標
+int snackhead_y;		//蛇头水平坐标
+int i,j;				//循环变量
+int direction;			//方向
+int length;				//蛇长
+int pause;				//缓冲变量
+int difficulty;			//难度
+int food_x;				//食物竖直坐标
+int food_y;				//食物水平坐标
+char ch;
+
+
+int Gameover(int,int);	//是否游戏结束
+int Initialize();		//数据初始化
+int Show();				//显示
+int BackStage();		//后台处理数据
+int InputRefresh();		//根据键盘输入 处理数据
+void gotoxy(int,int);	//光标清屏
+void HideCursor();		//隐藏光标
+
+
+int main()
+{
+	Initialize();		//数据初始化
+	while(1)
+	{
+		Show();			//显示
+		BackStage();	//后台处理
+		InputRefresh();	//输入控制
+	}
+	return 0;
+}
+
+int Gameover(int x,int y)	//游戏结束
+{
+	if( snackhead_x<0		||	//此4行表示撞墙
+		snackhead_x>High-2	||
+		snackhead_y<0		||
+		snackhead_y>Width-2	||
+		display[x][y]>0		)	//自伤
+	{
+		printf("\n\n Gameover! \n");
+		exit(0);
+	}
+	return 0;
+}
+
+int Initialize()	//初始化
+{
+	snackhead_x	= High / 5 * 3;
+	snackhead_y = Width / 2;
+	display[snackhead_x][snackhead_y] = 1;	//蛇头初始化
+	direction = 1;
+	length = 8;
+	difficulty = 0;
+	pause  = 30;
+	for( i=1;i<=length;i++ )	//蛇身初始化
+		display[snackhead_x][snackhead_y+i-1] = i;
+	return 0;
+}
+
+int InputRefresh()	//輸入控制
+{
+	ch = -32;
+	if( kbhit() )
+	{
+		ch = getch();
+		if( ch==72 && direction!=2 )	//上
+			direction = 1;
+		if( ch==80 && direction!=1 )	//下
+			direction = 2;
+		if( ch==75 && direction!=4 )	//左
+			direction = 3;
+		if( ch==77 && direction!=3 )	//右
+			direction = 4;
+	}
+	return 0;
+}
+
+int BackStage()		//後台控制
+{
+	if( pause!=difficulty )	//画面缓冲
+		pause--;
+	else
+	{
+		pause = 30;
+		for( i=0;i<High;i++ )
+		{
+			for( j=0;j<Width;j++ )
+			{
+				if( display[i][j]>0 )	//蛇数据更新
+				{
+					display[i][j] ++;
+					if( display[i][j]==length+1 )
+						display[i][j] = 0;
+				}
+			}
+		}
+		if( direction==1 )	//向上移动
+		{
+			snackhead_x --;
+			if( !Gameover(snackhead_x,snackhead_y) )
+				display[snackhead_x][snackhead_y] = 1;
+		}
+		if( direction==2 )	//向下移动
+		{
+			snackhead_x ++;
+			if( !Gameover(snackhead_x,snackhead_y) )
+				display[snackhead_x][snackhead_y] = 1;
+		}
+		if( direction==3 )	//向左移动
+		{
+			snackhead_y --;
+			if( !Gameover(snackhead_x,snackhead_y) )
+				display[snackhead_x][snackhead_y] = 1;
+		}
+		if( direction==4 )	//向右移动
+		{
+			snackhead_y ++;
+			if( !Gameover(snackhead_x,snackhead_y) )
+				display[snackhead_x][snackhead_y] = 1;
+		}
+	}
+	return 0;
+}
+
+int Show()	//顯示
+{
+	gotoxy(0,0);		//光标移动到原点位置，以下重画清屏
+	HideCursor();		//隐藏光标
+	for( i=0;i<High;i++ )
+	{
+		for( j=0;j<Width;j++ )
+		{
+			if( display[i][j]==1 )
+				printf("@");	//蛇头
+			else if( i==High-1 || j==Width-1 )
+				printf("#");	//边界
+			else if( display[i][j]>1 )
+				printf("*");	//蛇身
+			else
+				printf(" ");	//空白
+		}
+		printf("\n");
+	}
+	return 0;
+}
+
+void gotoxy(int x, int y)		
+{		//光标移动到(x,y)位置
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD pos;
+	pos.X = x;
+	pos.Y = y;
+	SetConsoleCursorPosition(handle,pos);
+}
+
+void HideCursor()	//隱藏光標
+{
+	CONSOLE_CURSOR_INFO cursor_info={1,0};//第二个值为0，表示隐藏光标
+	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE),&cursor_info);
+}
