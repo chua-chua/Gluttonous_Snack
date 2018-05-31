@@ -5,7 +5,7 @@
 #include<time.h>
 
 
-#define High	20					//屏幕高度
+#define High	40					//屏幕高度
 #define Width	40					//屏幕宽度
 #define Buffer	30					//最大缓冲倍数
 
@@ -223,15 +223,15 @@ int Show()	//顯示
 		for( j=0;j<Width;j++ )
 		{
 			if( display[i][j]==1 )
-				printf("@");	//蛇头
+				printf("@ ");	//蛇头
 			else if( display[i][j]==-2 )
-				printf("#");	//边界
+				printf("# ");	//边界
 			else if( display[i][j]>1 )
-				printf("*");	//蛇身
+				printf("* ");	//蛇身
 			else if( display[i][j]==-1 )
-				printf("$");	//食物
+				printf("$ ");	//食物
 			else
-				printf(" ");	//空白
+				printf("  ");	//空白
 		}
 		printf("\n");
 	}
